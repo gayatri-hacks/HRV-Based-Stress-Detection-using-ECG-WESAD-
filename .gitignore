@@ -22,3 +22,5 @@ approach.md
 
 
 WESAD.zip
+frontend/dist/
+__pycache__/
