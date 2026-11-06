@@ -1,0 +1,102 @@
+{
+  "selected_model": "logistic_regression",
+  "selection_reason": "Selected using validation stress F1 at the predeclared 0.5 threshold (logistic regression 0.095, LSTM 0.000). The final test subjects were not used for selection or threshold tuning.",
+  "data": {
+    "subjects": [
+      "S10",
+      "S11",
+      "S13",
+      "S14",
+      "S15",
+      "S16",
+      "S17",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7",
+      "S8",
+      "S9"
+    ],
+    "train_subjects": [
+      "S10",
+      "S11",
+      "S13",
+      "S14",
+      "S15",
+      "S16",
+      "S17",
+      "S6",
+      "S7",
+      "S8",
+      "S9"
+    ],
+    "validation_subjects": [
+      "S5"
+    ],
+    "test_subjects": [
+      "S2",
+      "S3",
+      "S4"
+    ],
+    "fs": 700,
+    "window_seconds": 60,
+    "window_hop_seconds": 30,
+    "time_steps": 10,
+    "feature_columns": [
+      "HRV_MeanNN",
+      "HRV_SDNN",
+      "HRV_RMSSD",
+      "HRV_pNN50",
+      "HRV_LF",
+      "HRV_HF",
+      "HRV_LFHF",
+      "HRV_SD1",
+      "HRV_SD2"
+    ],
+    "window_counts": {
+      "train": 649,
+      "validation": 58,
+      "test": 170
+    },
+    "sequence_counts": {
+      "train": 451,
+      "validation": 40,
+      "test": 116
+    },
+    "raw_dataset": "Licensed WESAD directory supplied via --raw-dir; raw recordings are not versioned."
+  },
+  "baseline_logistic_regression": {
+    "validation": {
+      "accuracy": 0.6724137931034483,
+      "f1": 0.09523809523809523,
+      "precision": 1.0,
+      "recall": 0.05,
+      "roc_auc": 0.906578947368421
+    },
+    "test": {
+      "accuracy": 0.8,
+      "f1": 0.6222222222222222,
+      "precision": 0.9032258064516129,
+      "recall": 0.4745762711864407,
+      "roc_auc": 0.8790655061841502
+    }
+  },
+  "lstm": {
+    "validation": {
+      "accuracy": 0.725,
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "roc_auc": 0.9498432601880877
+    },
+    "test": {
+      "accuracy": 0.7844827586206896,
+      "f1": 0.358974358974359,
+      "precision": 1.0,
+      "recall": 0.21875,
+      "roc_auc": 0.9992559523809524
+    }
+  }
+}

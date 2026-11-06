@@ -1,55 +1,23 @@
-# app/services/hrv_features.py
-
+from __future__ import annotations
 import numpy as np
-from scipy.signal import welch
 from scipy.integrate import trapezoid
+from scipy.signal import welch
 
-def compute_hrv_features(rr_ms: np.ndarray):
-
-    mean_nn = np.mean(rr_ms)
-    sdnn = np.std(rr_ms, ddof=1)
-
+def compute_hrv_features(rr_ms: np.ndarray) -> dict[str, float]:
+    rr_ms = np.asarray(rr_ms, dtype=float)
+    if len(rr_ms) < 4 or not np.isfinite(rr_ms).all():
+        raise ValueError("At least four finite RR intervals are required for HRV features.")
     diff_rr = np.diff(rr_ms)
-    rmssd = np.sqrt(np.mean(diff_rr**2))
-
-    nn50 = np.sum(np.abs(diff_rr) > 50)
-    pnn50 = 100 * nn50 / len(diff_rr)
-
-    # Frequency domain
-    rr_sec = rr_ms / 1000
-    time_rr = np.cumsum(rr_sec)
-
-    fs_interp = 4
-    interp_time = np.arange(0, time_rr[-1], 1/fs_interp)
-    interp_rr = np.interp(interp_time, time_rr[:-1], rr_ms[:-1])
-
-    freqs, psd = welch(interp_rr, fs=fs_interp)
-
-    # Poincaré features
-    diff_rr = np.diff(rr_ms)
-
-    sd1 = np.sqrt(0.5) * np.std(diff_rr, ddof=1)
-    sd2 = np.sqrt(2 * (sdnn**2) - 0.5 * (np.std(diff_rr, ddof=1)**2))
-
-    lf_band = (0.04, 0.15)
-    hf_band = (0.15, 0.4)
-
-    lf_mask = (freqs >= lf_band[0]) & (freqs <= lf_band[1])
-    hf_mask = (freqs >= hf_band[0]) & (freqs <= hf_band[1])
-
-    lf = trapezoid(psd[lf_mask], freqs[lf_mask])
-    hf = trapezoid(psd[hf_mask], freqs[hf_mask])
-
-    lfhf = lf / hf if hf != 0 else 0
-
-    return {
-    "HRV_MeanNN": mean_nn,
-    "HRV_SDNN": sdnn,
-    "HRV_RMSSD": rmssd,
-    "HRV_pNN50": pnn50,
-    "HRV_LF": lf,
-    "HRV_HF": hf,
-    "HRV_LFHF": lfhf,
-    "HRV_SD1": sd1,
-    "HRV_SD2": sd2
-}
+    if len(diff_rr) < 2:
+        raise ValueError("Too few RR differences for HRV features.")
+    mean_nn, sdnn = float(np.mean(rr_ms)), float(np.std(rr_ms, ddof=1))
+    beat_time = np.r_[0.0, np.cumsum(rr_ms[:-1]) / 1000.0]
+    grid = np.arange(0, beat_time[-1], 0.25)
+    if len(grid) < 8:
+        raise ValueError("RR duration is too short for frequency-domain HRV features.")
+    freqs, psd = welch(np.interp(grid, beat_time, rr_ms), fs=4.0, nperseg=min(256, len(grid)))
+    def band(lo: float, hi: float) -> float:
+        mask = (freqs >= lo) & (freqs <= hi)
+        return float(trapezoid(psd[mask], freqs[mask])) if mask.sum() >= 2 else 0.0
+    lf, hf, diff_std = band(0.04, 0.15), band(0.15, 0.4), float(np.std(diff_rr, ddof=1))
+    return {"HRV_MeanNN": mean_nn, "HRV_SDNN": sdnn, "HRV_RMSSD": float(np.sqrt(np.mean(diff_rr**2))), "HRV_pNN50": float(100*np.mean(np.abs(diff_rr)>50)), "HRV_LF": lf, "HRV_HF": hf, "HRV_LFHF": float(lf/hf) if hf else 0.0, "HRV_SD1": float(np.sqrt(.5)*diff_std), "HRV_SD2": float(np.sqrt(max(0., 2*sdnn**2-.5*diff_std**2)))}

@@ -9,7 +9,11 @@ import ResultDisplay from "@/components/ResultDisplay";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
-const VALID_TYPES = ["ppg", "ecg"];
+const VALID_TYPES = ["ecg"];
+const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
+
+interface StressResponse { prediction: 0 | 1; stress_probability: number; predicted_class_confidence: number; windows_used: number; minimum_duration_seconds: number; }
+interface ApiError { detail?: string; }
 
 const ScanPage = () => {
   const { type } = useParams<{ type: string }>();
@@ -20,6 +24,8 @@ const ScanPage = () => {
   const startProcessing = useScanStore((s) => s.startProcessing);
   const setResult = useScanStore((s) => s.setResult);
   const setScanType = useScanStore((s) => s.setScanType);
+  const setError = useScanStore((s) => s.setError);
+  const error = useScanStore((s) => s.error);
   const currentScanType = useScanStore((s) => s.scanType);
 
   const isValid = VALID_TYPES.includes(type || "");
@@ -37,60 +43,26 @@ const ScanPage = () => {
     startProcessing();
 
     try {
-      // Create separate FormData objects
-      const formDataStress = new FormData();
-      formDataStress.append("file", file);
-      formDataStress.append("fs", "250");
-
-      const formDataSleep = new FormData();
-      formDataSleep.append("file", file);
-      formDataSleep.append("fs", "250");
-
-      const baseUrl = "http://127.0.0.1:8000";
-
-      const stressUrl =
-        scanType === "ecg"
-          ? `${baseUrl}/predict/ecg/stress`
-          : `${baseUrl}/predict/ppg/stress`;
-
-      const sleepUrl =
-        scanType === "ecg"
-          ? `${baseUrl}/predict/ecg/sleep`
-          : `${baseUrl}/predict/ppg/sleep`;
-
-      const [stressRes, sleepRes] = await Promise.all([
-        fetch(stressUrl, {
-          method: "POST",
-          body: formDataStress,
-        }),
-        fetch(sleepUrl, {
-          method: "POST",
-          body: formDataSleep,
-        }),
-      ]);
-
-      if (!stressRes.ok || !sleepRes.ok) {
-        throw new Error("Backend error");
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fs", "700"); // WESAD chest ECG native sampling rate
+      const response = await fetch(`${API_URL}/predict/ecg/stress`, { method: "POST", body: formData });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({})) as ApiError;
+        throw new Error(body.detail ?? `Backend request failed (${response.status})`);
       }
-
-      const stressData = await stressRes.json();
-      const sleepData = await sleepRes.json();
+      const stressData = await response.json() as StressResponse;
 
       setResult({
         stressLevel: stressData.prediction,
-        stressConfidence: Math.round(stressData.confidence * 100),
-
-        sleepState: sleepData.prediction,
-        sleepConfidence: Math.round(sleepData.confidence * 100),
+        stressProbability: Math.round(stressData.stress_probability * 100),
 
         timestamp: new Date().toISOString(),
       });
     } catch (err) {
-      console.error("Prediction error:", err);
-      alert("Failed to fetch results. Check backend server.");
-      useScanStore.getState().reset();
+      setError(err instanceof Error ? err.message : "Prediction request failed.");
     }
-  }, [file, scanType, startProcessing, setResult]);
+  }, [file, startProcessing, setResult, setError]);
 
   if (!isValid) return <Navigate to="/" replace />;
 
@@ -107,7 +79,7 @@ const ScanPage = () => {
             {scanType.toUpperCase()} Analysis
           </span>
           <h1 className="text-3xl md:text-4xl font-extrabold font-display text-foreground">
-            Upload Your {scanType === "ppg" ? "PPG" : "ECG"} Report
+            Upload Your ECG CSV
           </h1>
         </motion.div>
 
@@ -121,6 +93,8 @@ const ScanPage = () => {
               className="space-y-6"
             >
               <UploadZone />
+
+              {error && <p role="alert" className="text-sm text-destructive text-center">{error}</p>}
 
               <div className="flex justify-center">
                 <Button

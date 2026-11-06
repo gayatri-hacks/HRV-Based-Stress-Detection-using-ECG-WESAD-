@@ -5,12 +5,9 @@ import { Upload, FileCheck, X } from "lucide-react";
 import { useScanStore } from "@/store/useScanStore";
 
 const ACCEPTED = {
-  "image/jpeg": [".jpg", ".jpeg"],
-  "image/png": [".png"],
-  "application/pdf": [".pdf"],
-  "csv": [".csv"],
+  "text/csv": [".csv"],
 };
-const MAX_SIZE = 20 * 1024 * 1024;
+const MAX_SIZE = 100 * 1024 * 1024;
 
 const UploadZone = () => {
   const file = useScanStore((s) => s.file);
@@ -52,10 +49,10 @@ const UploadZone = () => {
             <input {...getInputProps()} />
             <Upload className="h-10 w-10 text-primary mx-auto mb-4" />
             <p className="text-foreground font-semibold mb-1">
-              {isDragActive ? "Drop your file here" : "Drag & drop your report"}
+              {isDragActive ? "Drop your ECG CSV here" : "Drag & drop an ECG CSV"}
             </p>
             <p className="text-sm text-muted-foreground">
-              Supports JPG, PNG, PDF — max 20MB
+              CSV only, with a numeric signal column — max 100MB
             </p>
             </div>
           </motion.div>
@@ -96,7 +93,7 @@ const UploadZone = () => {
 
       {fileRejections.length > 0 && (
         <p className="text-sm text-destructive mt-2">
-          Invalid file. Please upload a JPG, PNG, or PDF under 20MB.
+          Invalid file. Please upload an ECG CSV under 100MB.
         </p>
       )}
     </div>

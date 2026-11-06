@@ -1,12 +1,10 @@
 import { create } from "zustand";
 
-export type ScanType = "ppg" | "ecg";
+export type ScanType = "ecg";
 
 interface ScanResult {
-  stressLevel: string;        // "Stressed" | "Not Stressed"
-  stressConfidence: number;   // %
-  sleepState: string;         // "Wake" | "Light" | "Deep"
-  sleepConfidence: number;    // %
+  stressLevel: number;
+  stressProbability: number;  // % probability of stress, not class confidence
   timestamp: string;
 }
 
@@ -15,11 +13,13 @@ interface ScanState {
   file: File | null;
   isProcessing: boolean;
   result: ScanResult | null;
+  error: string | null;
 
   setScanType: (type: ScanType) => void;
   setFile: (file: File | null) => void;
   startProcessing: () => void;
   setResult: (result: ScanResult) => void;
+  setError: (error: string | null) => void;
   reset: () => void;
 }
 
@@ -28,16 +28,17 @@ export const useScanStore = create<ScanState>((set) => ({
   file: null,
   isProcessing: false,
   result: null,
+  error: null,
 
   setScanType: (type) =>
     set({
       scanType: type,
       file: null,
       result: null,
-      isProcessing: false,
+      isProcessing: false, error: null,
     }),
 
-  setFile: (file) => set({ file }),
+  setFile: (file) => set({ file, error: null, result: null }),
 
   startProcessing: () =>
     set({
@@ -51,6 +52,7 @@ export const useScanStore = create<ScanState>((set) => ({
       result,
       isProcessing: false,
     }),
+  setError: (error) => set({ error, isProcessing: false }),
 
   reset: () =>
     set({
@@ -58,5 +60,6 @@ export const useScanStore = create<ScanState>((set) => ({
       file: null,
       isProcessing: false,
       result: null,
+      error: null,
     }),
 }));

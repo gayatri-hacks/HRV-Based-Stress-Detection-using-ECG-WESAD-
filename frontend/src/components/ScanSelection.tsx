@@ -1,22 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Heart, Waves } from "lucide-react";
+import { Waves } from "lucide-react";
 import { useScanStore } from "@/store/useScanStore";
 
 const scans = [
   {
-    type: "ppg" as const,
-    title: "PPG Scan",
-    subtitle: "Photoplethysmography",
-    description: "Analyze heart rate variability from optical pulse wave signals",
-    icon: Heart,
-    gradient: "from-primary to-accent",
-  },
-  {
     type: "ecg" as const,
     title: "ECG Scan",
     subtitle: "Electrocardiography",
-    description: "Analyze cardiac electrical activity for stress and sleep patterns",
+    description: "Analyze a CSV ECG recording for a research stress prediction",
     icon: Waves,
     gradient: "from-accent to-primary",
   },
@@ -26,7 +18,7 @@ const ScanSelection = () => {
   const navigate = useNavigate();
   const setScanType = useScanStore((s) => s.setScanType);
 
-  const handleSelect = (type: "ppg" | "ecg") => {
+  const handleSelect = (type: "ecg") => {
     setScanType(type);
     navigate(`/scan/${type}`);
   };
@@ -43,11 +35,11 @@ const ScanSelection = () => {
           Analyze Your Health Signals
         </h1>
         <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-          Upload your PPG or ECG report and get instant stress and sleep analysis with confidence metrics.
+          Upload a genuine ECG CSV recording for a research stress prediction. This is not a medical device.
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+      <div className="grid gap-6 max-w-xl mx-auto">
         {scans.map((scan, i) => (
           <motion.button
             key={scan.type}

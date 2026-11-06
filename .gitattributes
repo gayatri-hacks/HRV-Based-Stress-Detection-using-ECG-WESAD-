@@ -1,8 +1,2 @@
-*.joblib filter=lfs diff=lfs merge=lfs -text
-*.pkl filter=lfs diff=lfs merge=lfs -text
-*.csv filter=lfs diff=lfs merge=lfs -text
-app/models/*.pkl filter=lfs diff=lfs merge=lfs -text
-app/models/*.joblib filter=lfs diff=lfs merge=lfs -text
-app/models/*.keras filter=lfs diff=lfs merge=lfs -text
-daata/synthetic/*.csv filter=lfs diff=lfs merge=lfs -text
-*.keras filter=lfs diff=lfs merge=lfs -text
+# Trained WESAD artifacts in app/models are ordinary Git files.
+# The deployed bundle is small and must not depend on unavailable Git LFS objects.

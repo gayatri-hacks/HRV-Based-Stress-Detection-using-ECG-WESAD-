@@ -3,47 +3,6 @@ import ResultSlider from "./ResultSlider";
 import PDFExportButton from "./PDFExportButton";
 import { useScanStore } from "@/store/useScanStore";
 
-const SleepStageCard = ({
-  stage,
-  confidence,
-  delay,
-}: {
-  stage: string;
-  confidence: number;
-  delay: number;
-}) => {
-  const stageColor =
-    stage === "Deep"
-      ? "text-green-600"
-      : stage === "Light"
-      ? "text-yellow-600"
-      : "text-red-500";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: delay / 1000 }}
-      className="rounded-xl border bg-card p-6 shadow-soft"
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-foreground">Sleep Stage</h3>
-        <span className={`font-semibold ${stageColor}`}>
-          {stage}
-        </span>
-      </div>
-
-      <div className="text-4xl font-extrabold font-display text-foreground mb-4">
-        {stage}
-      </div>
-
-      <div className="text-sm text-muted-foreground">
-        Confidence: <span className="font-semibold">{confidence}%</span>
-      </div>
-    </motion.div>
-  );
-};
-
 const ResultDisplay = () => {
   const result = useScanStore((s) => s.result);
   const scanType = useScanStore((s) => s.scanType);
@@ -67,20 +26,12 @@ const ResultDisplay = () => {
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5">
-        {/* Stress remains numeric */}
+      <div className="max-w-sm mx-auto">
         <ResultSlider
           label="Stress Level"
           value={result.stressLevel}
-          confidence={result.stressConfidence}
+          probability={result.stressProbability}
           delay={200}
-        />
-
-        {/* Sleep is now categorical */}
-        <SleepStageCard
-          stage={result.sleepState}
-          confidence={result.sleepConfidence}
-          delay={500}
         />
       </div>
 
