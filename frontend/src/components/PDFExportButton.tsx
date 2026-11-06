@@ -33,7 +33,7 @@ const PDFExportButton = () => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
     doc.text(`Prediction: ${result.stressLevel === 1 ? "Stressed" : "Not stressed"}`, 20, 68);
-    doc.text(`Confidence: ${result.stressConfidence}%`, 20, 76);
+    doc.text(`Stress probability: ${result.stressProbability}%`, 20, 76);
 
     doc.setFontSize(9);
     doc.setTextColor(150);

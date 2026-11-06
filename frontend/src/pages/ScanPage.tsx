@@ -12,7 +12,7 @@ import { ArrowRight } from "lucide-react";
 const VALID_TYPES = ["ecg"];
 const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
 
-interface StressResponse { prediction: 0 | 1; confidence: number; windows_used: number; minimum_duration_seconds: number; }
+interface StressResponse { prediction: 0 | 1; stress_probability: number; predicted_class_confidence: number; windows_used: number; minimum_duration_seconds: number; }
 interface ApiError { detail?: string; }
 
 const ScanPage = () => {
@@ -55,7 +55,7 @@ const ScanPage = () => {
 
       setResult({
         stressLevel: stressData.prediction,
-        stressConfidence: Math.round(stressData.confidence * 100),
+        stressProbability: Math.round(stressData.stress_probability * 100),
 
         timestamp: new Date().toISOString(),
       });

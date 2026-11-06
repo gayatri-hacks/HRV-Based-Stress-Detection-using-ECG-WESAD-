@@ -4,7 +4,7 @@ export type ScanType = "ecg";
 
 interface ScanResult {
   stressLevel: number;
-  stressConfidence: number;   // %
+  stressProbability: number;  // % probability of stress, not class confidence
   timestamp: string;
 }
 

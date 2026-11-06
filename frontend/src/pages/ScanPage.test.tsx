@@ -12,7 +12,7 @@ afterEach(() => {
 it("uploads an ECG CSV and renders the API stress result", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
     ok: true,
-    json: async () => ({ prediction: 0, confidence: 0.3069808669, windows_used: 1, minimum_duration_seconds: 60 }),
+    json: async () => ({ prediction: 0, stress_probability: 0.3069808669, predicted_class_confidence: 0.6930191331, windows_used: 1, minimum_duration_seconds: 60 }),
   }));
   render(<MemoryRouter initialEntries={["/scan/ecg"]}><Routes><Route path="/scan/:type" element={<ScanPage />} /></Routes></MemoryRouter>);
   const input = document.querySelector("input[type=file]") as HTMLInputElement;

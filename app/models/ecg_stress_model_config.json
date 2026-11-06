@@ -1,8 +1,7 @@
 {
   "selected_model": "logistic_regression",
-  "selection_reason": "Higher held-out stress F1 than the LSTM; deployed inference uses one 60-second pure ECG window.",
+  "selection_reason": "Selected using validation stress F1 at the predeclared 0.5 threshold (logistic regression 0.095, LSTM 0.000). The final test subjects were not used for selection or threshold tuning.",
   "data": {
-    "raw_dir": "/Users/gayatrigajam/Downloads/WESAD",
     "subjects": [
       "S10",
       "S11",
@@ -65,7 +64,8 @@
       "train": 451,
       "validation": 40,
       "test": 116
-    }
+    },
+    "raw_dataset": "Licensed WESAD directory supplied via --raw-dir; raw recordings are not versioned."
   },
   "baseline_logistic_regression": {
     "validation": {

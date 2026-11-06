@@ -62,4 +62,11 @@ async def predict_ecg_stress(file: Annotated[UploadFile, File(...)], fs: Annotat
     probability = float(artifacts.model.predict_proba(features)[0, positive_index])
     if not 0 <= probability <= 1:
         raise HTTPException(503, detail="Model returned an invalid probability.")
-    return {"prediction": int(probability >= .5), "confidence": probability, "windows_used": 1, "minimum_duration_seconds": minimum_seconds}
+    prediction = int(probability >= .5)
+    return {
+        "prediction": prediction,
+        "stress_probability": probability,
+        "predicted_class_confidence": probability if prediction else 1.0 - probability,
+        "windows_used": 1,
+        "minimum_duration_seconds": minimum_seconds,
+    }

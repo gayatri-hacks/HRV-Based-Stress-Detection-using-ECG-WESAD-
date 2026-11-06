@@ -3,18 +3,18 @@ import { motion } from "framer-motion";
 interface ResultSliderProps {
   label: string;
   value: number;
-  confidence: number;
+  probability: number;
   delay?: number;
 }
 
-const ResultSlider = ({ label, value, confidence, delay = 0 }: ResultSliderProps) => {
+const ResultSlider = ({ label, value, probability, delay = 0 }: ResultSliderProps) => {
   const isStressed = value === 1;
 
   const statusText = isStressed ? "Stressed" : "Not Stressed";
   const statusColor = isStressed ? "text-destructive" : "text-primary";
   const barColor = isStressed ? "bg-destructive" : "bg-primary";
 
-  const pct = confidence;
+  const pct = probability;
 
   return (
     <motion.div
@@ -37,7 +37,7 @@ const ResultSlider = ({ label, value, confidence, delay = 0 }: ResultSliderProps
         {statusText}
       </div>
 
-      {/* 🔥 Confidence-based progress bar */}
+      {/* This bar represents P(stress), not confidence in the displayed class. */}
       <div className="relative h-3 rounded-full bg-secondary overflow-hidden mb-3">
         <motion.div
           className={`absolute inset-y-0 left-0 rounded-full ${barColor}`}
@@ -48,9 +48,9 @@ const ResultSlider = ({ label, value, confidence, delay = 0 }: ResultSliderProps
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Confidence:{" "}
+        Stress probability:{" "}
         <span className="font-semibold text-foreground">
-          {confidence}%
+          {probability}%
         </span>
       </p>
     </motion.div>

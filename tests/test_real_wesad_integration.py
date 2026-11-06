@@ -15,4 +15,7 @@ def test_real_wesad_ecg_prediction():
     assert response.status_code == 200, response.text
     payload = response.json()
     assert payload["prediction"] in (0, 1)
-    assert 0 <= payload["confidence"] <= 1
+    assert 0 <= payload["stress_probability"] <= 1
+    assert 0 <= payload["predicted_class_confidence"] <= 1
+    expected = payload["stress_probability"] if payload["prediction"] == 1 else 1 - payload["stress_probability"]
+    assert payload["predicted_class_confidence"] == pytest.approx(expected)

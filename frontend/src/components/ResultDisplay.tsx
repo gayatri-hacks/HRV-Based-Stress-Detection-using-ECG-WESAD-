@@ -30,7 +30,7 @@ const ResultDisplay = () => {
         <ResultSlider
           label="Stress Level"
           value={result.stressLevel}
-          confidence={result.stressConfidence}
+          probability={result.stressProbability}
           delay={200}
         />
       </div>

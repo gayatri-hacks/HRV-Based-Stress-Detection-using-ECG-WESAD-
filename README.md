@@ -6,14 +6,12 @@ This repository contains the **ECG → HRV → Stress detection pipeline** devel
 
 ## Running the application
 
-Use Python 3.10–3.12 (TensorFlow does not currently support the system's Python 3.14). Create an environment, install the backend requirements, and restore the tracked artifacts from the original clone:
+Use Python 3.10–3.12 (TensorFlow does not currently support Python 3.14). A fresh clone already contains the small deployed model bundle as ordinary Git files; no Git LFS command is needed.
 
 ```bash
 python3.11 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
-git lfs install
-git lfs pull
 uvicorn app.main:app --reload
 ```
 
@@ -36,13 +34,13 @@ WESAD is licensed source data; obtain it from the [official WESAD page](https://
 
 ### Reproducible real-data training
 
-The original LFS model objects are no longer recoverable, so [`scripts/train_wesad_models.py`](/Users/gayatrigajam/Downloads/HRV-Based-Stress-Detection-using-ECG-WESAD--main/scripts/train_wesad_models.py) trains replacement artifacts only from licensed raw WESAD files:
+The original LFS model objects are no longer recoverable, so [`scripts/train_wesad_models.py`](scripts/train_wesad_models.py) trains replacement artifacts only from licensed raw WESAD files:
 
 ```bash
 .venv/bin/python scripts/train_wesad_models.py --raw-dir ~/Downloads/WESAD --epochs 25
 ```
 
-It processes contiguous baseline and stress segments separately, uses 60-second windows with a 30-second hop, and discards any window that cannot yield valid HRV features. This avoids the original notebook's discontinuity caused by removing labels before resampling. It holds out S2/S3/S4 for final testing and S5 for validation; no subject occurs in more than one split. The former 30-step sequence would require 930 seconds and cannot fit a pure stress region. The replacement LSTM uses ten steps (330 seconds), but the saved configuration selects the better held-out model: a one-window logistic regression baseline. Exact feature order, split, configuration, and results are written to `app/models/ecg_stress_model_config.json` and `app/models/ecg_stress_evaluation.csv`.
+It processes contiguous baseline and stress segments separately, uses 60-second windows with a 30-second hop, and discards any window that cannot yield valid HRV features. This avoids the original notebook's discontinuity caused by removing labels before resampling. It holds out S2/S3/S4 for final testing and S5 for validation; no subject occurs in more than one split. The former 30-step sequence would require 930 seconds and cannot fit a pure stress region. The replacement LSTM uses ten steps (330 seconds). Model selection uses validation stress F1 at a fixed 0.5 threshold only: logistic regression (0.095) was selected over the LSTM (0.000). Final S2/S3/S4 results are reported only after that decision. Exact feature order, split, configuration, and results are tracked in [`app/models/ecg_stress_model_config.json`](app/models/ecg_stress_model_config.json) and [`app/models/ecg_stress_evaluation.csv`](app/models/ecg_stress_evaluation.csv).
 
 Current genuine held-out window metrics (S2/S3/S4) are: logistic regression accuracy 0.800, stress F1 0.622, precision 0.903, recall 0.475, ROC-AUC 0.879. The LSTM was retained as an evaluated artifact but is not deployed because its held-out stress F1 was 0.359. These results are experimental, subject to protocol confounding, and not clinical validation.
 
@@ -54,7 +52,7 @@ python scripts/extract_wesad_ecg.py --raw-dir data/WESAD --subject S2 --output /
 
 The script output is an actual recording and includes `sample`, `time_seconds`, `signal`, and WESAD `label`. `data/processed/` contains derived feature/RR artifacts. `data/synthetic/` and `src/synthetic_data.ipynb` are test/demo fixtures only and are not valid evidence of real-data inference.
 
-After LFS restoration, demonstrate real inference with:
+For a fresh-clone real-data demonstration, first obtain licensed WESAD data, extract an ECG CSV, then run:
 
 ```bash
 WESAD_ECG_SMOKE_CSV=/tmp/S2_ecg.csv pytest -m integration -q
@@ -67,7 +65,7 @@ pytest -m 'not integration' -q
 cd frontend && npm run lint && npx tsc --noEmit && npm test && npm run build
 ```
 
-The GitHub Actions workflow runs unit/contract tests and frontend checks. The genuine WESAD smoke test is intentionally opt-in, because neither licensed recordings nor LFS model weights belong in CI.
+The GitHub Actions workflow runs unit/contract tests with `python -m pytest -m "not integration"` and frontend checks. The genuine WESAD smoke test is intentionally opt-in because licensed recordings do not belong in CI. The deployed model bundle is committed as ordinary Git files, not LFS pointers.
 
 This branch focuses **exclusively on ECG-based stress detection**, covering:
 
