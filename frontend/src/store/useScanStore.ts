@@ -44,6 +44,7 @@ export const useScanStore = create<ScanState>((set) => ({
     set({
       isProcessing: true,
       result: null,
+      error: null,
     }),
 
   // 🔥 Important: stops processing automatically
